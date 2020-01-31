@@ -68,6 +68,7 @@ _sysdata_subscription_facet_attributes_mapping = {
     'registered_by': 'registered_by',
     'registration_time': 'registered_at',
     'last_checkin_time': 'last_checkin',
+    'product_id': 'product_id',
 }
 
 _sysdata_content_facet_attributes_mapping = {
@@ -163,6 +164,7 @@ _title_mapping = {
     'virtual': 'Virtual',
     'osfamily': 'OS Family',
     'operatingsystem': 'Operating System',
+    'product_id': 'SKU',
     'entitlements': 'Subscription Name',
     'entitlement': 'Subscription Name',
     'software_channel': 'Software Channel',
@@ -182,7 +184,7 @@ _title_mapping = {
 }
 
 _format_columns_mapping = {
-  'original': ['uuid', 'hostname', 'compliant', 'entitlements', 'amount', 'account_number', 'contract_number', 'start_date', 'end_date', 'num_sockets', 'cores', 'virtual', 'hypervisor', 'osfamily', 'operatingsystem', 'biosvendor', 'biosversion', 'biosreleasedate', 'manufacturer', 'systype', 'boardserialnumber', 'boardproductname', 'is_virtualized', 'num_sockets', 'num_virtual_guests'],
+  'original': ['uuid', 'hostname', 'compliant', 'product_id', 'entitlements', 'amount', 'account_number', 'contract_number', 'start_date', 'end_date', 'num_sockets', 'cores', 'virtual', 'hypervisor', 'osfamily', 'operatingsystem', 'biosvendor', 'biosversion', 'biosreleasedate', 'manufacturer', 'systype', 'boardserialnumber', 'boardproductname', 'is_virtualized', 'num_sockets', 'num_virtual_guests'],
   'spacewalk-report-inventory': ['uuid', 'hostname', 'ip_address', 'ipv6_address', 'registered_by', 'registration_time', 'last_checkin_time', 'kernel_version', 'packages_out_of_date', 'errata_out_of_date', 'software_channel', 'configuration_channel', 'entitlements', 'system_group', 'organization', 'virtual_host', 'virtual_host_name', 'architecture', 'is_virtualized', 'virt_type', 'katello_agent_installed', 'hardware'],
   'spacewalk-report-inventory-customized': ['uuid', 'hostname', 'ip_addresses', 'ipv6_addresses', 'registered_by', 'registration_time', 'last_checkin_time', 'kernel_version', 'packages_out_of_date', 'errata_out_of_date', 'software_channel', 'configuration_channel', 'entitlements', 'system_group', 'organization', 'virtual_host', 'virtual_host_name', 'architecture', 'is_virtualized', 'virt_type', 'katello_agent_installed', 'cores', 'num_sockets', 'num_virtual_guests', 'derived_entitlement', 'location'],
 }
@@ -500,6 +502,7 @@ for system in systemdata:
     for key in _sysdata_mapping.keys() + _sysdata_facts_mapping.keys() + _sysdata_virtual_host_mapping.keys() + _sysdata_errata_mapping.keys() + _facts_mapping.keys() + fake:
         host_info[key] = 'unknown'
 
+    host_info['product_id'] = "NA" 
     # it's possible a server does not have an entitlement applied to it so we need to check for this and skip if not.
     system_had_entitlements = False
     try:
@@ -521,6 +524,10 @@ for system in systemdata:
             host_info['organization'] = orgname
             host_info['account_number'] = entitlement['account_number']
             host_info['contract_number'] = entitlement['contract_number']
+            if entitlement.has_key('product_id'):
+            	host_info['product_id'] = entitlement['product_id']
+            else:
+            	host_info['product_id'] = "NA"
             host_info['start_date'] = entitlement['start_date']
             host_info['end_date'] = entitlement['end_date']
             host_info['hypervisor'] = "NA"
